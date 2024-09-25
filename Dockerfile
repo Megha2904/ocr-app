@@ -1,20 +1,20 @@
-# Use a Python base image
-FROM python:3.9-slim
+FROM python:3.10-slim
 
-# Install Tesseract OCR
-RUN apt-get update && apt-get install -y tesseract-ocr
+# Install Tesseract
+RUN apt-get update && \
+    apt-get install -y tesseract-ocr && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
+# Set the working directory
+WORKDIR /home/user/app
 
-# Install Python dependencies from the requirements file
-COPY requirements.txt /app/requirements.txt
-RUN pip install -r /app/requirements.txt
+# Copy the requirements.txt file and install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy your app code
-COPY . /app
-WORKDIR /app
+# Copy the rest of your app files
+COPY . .
 
-# Expose the app port (if needed)
-EXPOSE 8501
-
-# Run the app
-CMD ["streamlit", "run", "app.py"]
+# Command to run the Streamlit app
+CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
