@@ -1,14 +1,14 @@
-# Use a base Python image
+# Use a Python base image
 FROM python:3.9-slim
 
-# Install system dependencies for Tesseract
+# Install Tesseract and its dependencies
 RUN apt-get update && apt-get install -y tesseract-ocr libtesseract-dev
 
-# Copy the requirements and install Python dependencies
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+# Install Python dependencies from the requirements file
+COPY requirements.txt /app/requirements.txt
+RUN pip install -r /app/requirements.txt
 
-# Copy the application code
+# Copy your app code
 COPY . /app
 WORKDIR /app
 
