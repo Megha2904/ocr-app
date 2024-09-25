@@ -2,8 +2,8 @@ import streamlit as st
 import pytesseract
 from PIL import Image
 
-# Path to Tesseract executable (Windows)
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+# Remove the local path for Tesseract; it will be found automatically in the cloud environment.
+# pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 # Title and instructions
 st.title("OCR and Keyword Search")
