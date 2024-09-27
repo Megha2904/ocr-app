@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Verify Tesseract installation
+RUN tesseract --version
+
 # Set the working directory in the container
 WORKDIR /app
 
@@ -26,12 +29,10 @@ headless = true\n\
 port = 8501\n\
 enableCORS = false\n\
 \n\
-[global]\n\
-browser.gatherUsageStats = false\n\
 " > ~/.streamlit/config.toml
 
-# Expose the port that the Streamlit app runs on
+# Expose the port Streamlit will run on
 EXPOSE 8501
 
-# Run the application
+# Run the Streamlit app
 CMD ["streamlit", "run", "app.py"]
