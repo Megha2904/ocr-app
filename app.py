@@ -1,6 +1,7 @@
 import streamlit as st
 import easyocr
 from PIL import Image, ImageEnhance, ImageFilter
+import numpy as np
 import re
 
 # Initialize EasyOCR Reader for Hindi and English
@@ -33,10 +34,14 @@ if uploaded_file is not None:
     image_np = np.array(image)
 
     # Perform OCR and cache results
-    @st.cache
+    @st.cache_data
     def process_image(image_np):
-        extracted_text = reader.readtext(image_np, detail=0, paragraph=True)
-        return ' '.join(extracted_text)
+        try:
+            extracted_text = reader.readtext(image_np, detail=0, paragraph=True)
+            return ' '.join(extracted_text)
+        except Exception as e:
+            st.error(f"Error during OCR processing: {e}")
+            return ""
 
     with st.spinner("Processing image..."):
         extracted_text = process_image(image_np)
