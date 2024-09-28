@@ -1,11 +1,10 @@
 import streamlit as st
 import easyocr
 from PIL import Image, ImageEnhance, ImageFilter
-import numpy as np
 import re
 
-# Initialize EasyOCR reader
-reader = easyocr.Reader(['en', 'hi'])  # Specify languages: English and Hindi
+# Initialize EasyOCR Reader for Hindi and English
+reader = easyocr.Reader(['en', 'hi'])
 
 # Title and instructions
 st.title("OCR and Keyword Search with Highlighting")
@@ -16,26 +15,33 @@ uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png
 
 if uploaded_file is not None:
     # Display the uploaded image
-    try:
-        image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Image", use_column_width=True)
+    image = Image.open(uploaded_file)
+    st.image(image, caption="Uploaded Image", use_column_width=True)
 
-        # Preprocess the image to improve OCR accuracy
-        image = image.convert('L')  # Convert to grayscale
-        image = image.filter(ImageFilter.SHARPEN)  # Sharpen the image
-        enhancer = ImageEnhance.Contrast(image)
-        image = enhancer.enhance(2)  # Increase contrast
+    # Resize the image for faster processing
+    max_width = 800
+    max_height = 800
+    image.thumbnail((max_width, max_height))
 
-        # Convert PIL image to NumPy array
-        image_np = np.array(image)
+    # Preprocess the image to improve OCR accuracy
+    image = image.convert('L')  # Convert to grayscale
+    image = image.filter(ImageFilter.SHARPEN)  # Sharpen the image
+    enhancer = ImageEnhance.Contrast(image)
+    image = enhancer.enhance(2)  # Increase contrast
 
-        # Perform OCR
+    # Convert the image to a numpy array for EasyOCR
+    image_np = np.array(image)
+
+    # Perform OCR and cache results
+    @st.cache
+    def process_image(image_np):
         extracted_text = reader.readtext(image_np, detail=0, paragraph=True)
-        extracted_text = ' '.join(extracted_text)  # Join the list of text into a single string
-        st.write("Extracted Text:")
+        return ' '.join(extracted_text)
 
-    except Exception as e:
-        st.error(f"Error processing the image: {e}")
+    with st.spinner("Processing image..."):
+        extracted_text = process_image(image_np)
+
+    st.write("Extracted Text:")
 
     # Input for keyword
     keyword = st.text_input("Enter a keyword to search for:")
