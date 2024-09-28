@@ -1,10 +1,11 @@
 import streamlit as st
 import easyocr
 from PIL import Image, ImageEnhance, ImageFilter
+import numpy as np
 import re
 
-# Initialize the EasyOCR reader for Hindi and English
-reader = easyocr.Reader(['en', 'hi'])  # Specify languages as needed
+# Initialize EasyOCR reader
+reader = easyocr.Reader(['en', 'hi'])  # Specify languages: English and Hindi
 
 # Title and instructions
 st.title("OCR and Keyword Search with Highlighting")
@@ -24,9 +25,12 @@ if uploaded_file is not None:
     enhancer = ImageEnhance.Contrast(image)
     image = enhancer.enhance(2)  # Increase contrast
 
-    # Perform OCR using EasyOCR
-    extracted_text = reader.readtext(image, detail=0, paragraph=True)
-    extracted_text = ' '.join(extracted_text)  # Join list into a single string
+    # Convert PIL image to NumPy array
+    image_np = np.array(image)
+
+    # Perform OCR
+    extracted_text = reader.readtext(image_np, detail=0, paragraph=True)
+    extracted_text = ' '.join(extracted_text)  # Join the list of text into a single string
     st.write("Extracted Text:")
 
     # Input for keyword
@@ -35,7 +39,7 @@ if uploaded_file is not None:
     if keyword:
         # Use inline CSS to colorize the keyword
         def highlight_keyword(text, keyword):
-            pattern = re.compile(f"({re.escape(keyword)})", re.IGNORECASE)
+            pattern = re.compile(f"({keyword})", re.IGNORECASE)
             return pattern.sub(r'<span style="color:red;"><b>\1</b></span>', text)
 
         highlighted_text = highlight_keyword(extracted_text, keyword)
@@ -44,7 +48,7 @@ if uploaded_file is not None:
         st.markdown(f"<p>{highlighted_text}</p>", unsafe_allow_html=True)
 
         # Keyword search result
-        if re.search(re.escape(keyword), extracted_text, re.IGNORECASE):
+        if re.search(keyword, extracted_text, re.IGNORECASE):
             st.success(f"Keyword '{keyword}' found and highlighted!")
         else:
             st.error(f"Keyword '{keyword}' not found.")
