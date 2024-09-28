@@ -16,22 +16,26 @@ uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png
 
 if uploaded_file is not None:
     # Display the uploaded image
-    image = Image.open(uploaded_file)
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+    try:
+        image = Image.open(uploaded_file)
+        st.image(image, caption="Uploaded Image", use_column_width=True)
 
-    # Preprocess the image to improve OCR accuracy
-    image = image.convert('L')  # Convert to grayscale
-    image = image.filter(ImageFilter.SHARPEN)  # Sharpen the image
-    enhancer = ImageEnhance.Contrast(image)
-    image = enhancer.enhance(2)  # Increase contrast
+        # Preprocess the image to improve OCR accuracy
+        image = image.convert('L')  # Convert to grayscale
+        image = image.filter(ImageFilter.SHARPEN)  # Sharpen the image
+        enhancer = ImageEnhance.Contrast(image)
+        image = enhancer.enhance(2)  # Increase contrast
 
-    # Convert PIL image to NumPy array
-    image_np = np.array(image)
+        # Convert PIL image to NumPy array
+        image_np = np.array(image)
 
-    # Perform OCR
-    extracted_text = reader.readtext(image_np, detail=0, paragraph=True)
-    extracted_text = ' '.join(extracted_text)  # Join the list of text into a single string
-    st.write("Extracted Text:")
+        # Perform OCR
+        extracted_text = reader.readtext(image_np, detail=0, paragraph=True)
+        extracted_text = ' '.join(extracted_text)  # Join the list of text into a single string
+        st.write("Extracted Text:")
+
+    except Exception as e:
+        st.error(f"Error processing the image: {e}")
 
     # Input for keyword
     keyword = st.text_input("Enter a keyword to search for:")
