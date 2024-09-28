@@ -4,7 +4,7 @@ This project is an Optical Character Recognition (OCR) application built using S
 
 ## Live Application
 
-You can access the live application here: [OCR and Keyword Search App](https://ocr-app-peorqlnbnuy8txkyebckgq.streamlit.app/)
+You can access the live application here: [OCR and Keyword Search App](https://ocr-app-u2k9v7z9dmnr2enxu9lsrz.streamlit.app/)
 
 ## Features
 
