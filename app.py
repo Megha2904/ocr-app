@@ -4,8 +4,8 @@ from PIL import Image, ImageEnhance, ImageFilter
 import numpy as np
 import re
 
-# Initialize EasyOCR Reader for Hindi and English
-reader = easyocr.Reader(['en', 'hi'])
+# Initialize EasyOCR reader
+reader = easyocr.Reader(['en', 'hi'])  # Specify languages: English and Hindi
 
 # Title and instructions
 st.title("OCR and Keyword Search with Highlighting")
@@ -16,37 +16,26 @@ uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png
 
 if uploaded_file is not None:
     # Display the uploaded image
-    image = Image.open(uploaded_file)
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+    try:
+        image = Image.open(uploaded_file)
+        st.image(image, caption="Uploaded Image", use_column_width=True)
 
-    # Resize the image for faster processing
-    max_width = 800
-    max_height = 800
-    image.thumbnail((max_width, max_height))
+        # Preprocess the image to improve OCR accuracy
+        image = image.convert('L')  # Convert to grayscale
+        image = image.filter(ImageFilter.SHARPEN)  # Sharpen the image
+        enhancer = ImageEnhance.Contrast(image)
+        image = enhancer.enhance(2)  # Increase contrast
 
-    # Preprocess the image to improve OCR accuracy
-    image = image.convert('L')  # Convert to grayscale
-    image = image.filter(ImageFilter.SHARPEN)  # Sharpen the image
-    enhancer = ImageEnhance.Contrast(image)
-    image = enhancer.enhance(2)  # Increase contrast
+        # Convert PIL image to NumPy array
+        image_np = np.array(image)
 
-    # Convert the image to a numpy array for EasyOCR
-    image_np = np.array(image)
+        # Perform OCR
+        extracted_text = reader.readtext(image_np, detail=0, paragraph=True)
+        extracted_text = ' '.join(extracted_text)  # Join the list of text into a single string
+        st.write("Extracted Text:")
 
-    # Perform OCR and cache results
-    @st.cache_data
-    def process_image(image_np):
-        try:
-            extracted_text = reader.readtext(image_np, detail=0, paragraph=True)
-            return ' '.join(extracted_text)
-        except Exception as e:
-            st.error(f"Error during OCR processing: {e}")
-            return ""
-
-    with st.spinner("Processing image..."):
-        extracted_text = process_image(image_np)
-
-    st.write("Extracted Text:")
+    except Exception as e:
+        st.error(f"Error processing the image: {e}")
 
     # Input for keyword
     keyword = st.text_input("Enter a keyword to search for:")
